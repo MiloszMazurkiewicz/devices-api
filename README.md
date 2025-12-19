@@ -1,10 +1,10 @@
 # Devices API
 
-REST API for managing device resources built with Java 21 and Spring Boot 3.
+This application provides a RESTful API for managing device resources. It supports full CRUD operations with filtering capabilities and enforces business rules around device state management.
+
 
 ## Table of Contents
 
-- [Overview](#overview)
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
@@ -14,27 +14,21 @@ REST API for managing device resources built with Java 21 and Spring Boot 3.
 - [Domain Model](#domain-model)
 - [Business Rules](#business-rules)
 - [Testing](#testing)
-- [Project Structure](#project-structure)
-- [Future Improvements](#future-improvements)
-
-## Overview
-
-This application provides a RESTful API for managing device resources. It supports full CRUD operations with filtering capabilities and enforces business rules around device state management.
 
 ## Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| Language | Java 21 |
-| Framework | Spring Boot 3.3.6 |
-| Build Tool | Maven 3.9+ |
-| Database | PostgreSQL 16 |
-| ORM | Spring Data JPA / Hibernate |
-| Migrations | Flyway |
-| API Docs | springdoc-openapi (OpenAPI 3.0) |
-| Object Mapping | MapStruct |
+| Component | Technology                       |
+|-----------|----------------------------------|
+| Language | Java 21                          |
+| Framework | Spring Boot 4.0.0                |
+| Build Tool | Maven 3.9+                       |
+| Database | PostgreSQL 16                    |
+| ORM | Spring Data JPA / Hibernate      |
+| Migrations | Flyway                           |
+| API Docs | springdoc-openapi (OpenAPI 3.0)  |
+| Object Mapping | MapStruct                        |
 | Testing | JUnit 5, Mockito, Testcontainers |
-| Containerization | Docker |
+| Containerization | Docker                           |
 
 ## Prerequisites
 
@@ -47,7 +41,7 @@ This application provides a RESTful API for managing device resources. It suppor
 ### Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/MiloszMazurkiewicz/devices-api
 cd devices-api
 ```
 
@@ -196,110 +190,10 @@ The API uses RFC 7807 Problem Details format for error responses:
 
 ## Testing
 
-The project includes comprehensive tests at multiple levels:
-
-### Unit Tests
-- Service layer tests with Mockito
-- Tests for all business rules
-
-```bash
-mvn test -Dtest=DeviceServiceTest
-```
-
-### Controller Tests
-- MockMvc tests for all endpoints
-- Request/response validation tests
-
-```bash
-mvn test -Dtest=DeviceControllerTest
-```
-
-### Integration Tests
-- Full end-to-end tests with Testcontainers
-- Uses real PostgreSQL database in Docker
-
-```bash
-mvn test -Dtest=DeviceIntegrationTest
-```
-
 ### Run all tests
 ```bash
 mvn test
 ```
-
-## Project Structure
-
-```
-devices-api/
-├── pom.xml
-├── Dockerfile
-├── docker-compose.yml
-├── README.md
-└── src/
-    ├── main/
-    │   ├── java/com/devices/api/
-    │   │   ├── DevicesApiApplication.java
-    │   │   ├── config/
-    │   │   │   └── OpenApiConfig.java
-    │   │   ├── controller/
-    │   │   │   └── DeviceController.java
-    │   │   ├── dto/
-    │   │   │   ├── DeviceRequest.java
-    │   │   │   ├── DeviceResponse.java
-    │   │   │   └── DeviceUpdateRequest.java
-    │   │   ├── entity/
-    │   │   │   └── Device.java
-    │   │   ├── enums/
-    │   │   │   └── DeviceState.java
-    │   │   ├── exception/
-    │   │   │   ├── DeviceInUseException.java
-    │   │   │   ├── DeviceNotFoundException.java
-    │   │   │   └── GlobalExceptionHandler.java
-    │   │   ├── mapper/
-    │   │   │   └── DeviceMapper.java
-    │   │   ├── repository/
-    │   │   │   └── DeviceRepository.java
-    │   │   └── service/
-    │   │       ├── DeviceService.java
-    │   │       └── DeviceServiceImpl.java
-    │   └── resources/
-    │       ├── application.yml
-    │       ├── application-docker.yml
-    │       └── db/migration/
-    │           └── V1__create_device_table.sql
-    └── test/
-        └── java/com/devices/api/
-            ├── controller/
-            │   └── DeviceControllerTest.java
-            ├── integration/
-            │   └── DeviceIntegrationTest.java
-            ├── repository/
-            │   └── DeviceRepositoryTest.java
-            └── service/
-                └── DeviceServiceTest.java
-```
-
-## Future Improvements
-
-1. **Pagination** - Add pagination support for the GET /devices endpoint using Spring Data's `Pageable` interface.
-
-2. **Caching** - Implement Redis caching for frequently accessed devices to improve read performance.
-
-3. **Auditing** - Add Spring Data JPA auditing to track `createdBy`, `updatedAt`, and `updatedBy` fields.
-
-4. **Security** - Implement OAuth2/JWT authentication to secure API endpoints.
-
-5. **Rate Limiting** - Add API rate limiting using Bucket4j or similar library.
-
-6. **Observability** - Add Micrometer metrics and distributed tracing with Spring Cloud Sleuth.
-
-7. **API Versioning** - Implement header-based or media type versioning for future API evolution.
-
-8. **Search** - Add full-text search capabilities using PostgreSQL's built-in search or Elasticsearch.
-
-9. **Events** - Implement domain events using Spring Application Events or a message broker for device state changes.
-
-10. **Health Checks** - Add custom health indicators for external dependencies monitoring.
 
 ## License
 
