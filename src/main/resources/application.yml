@@ -6,9 +6,9 @@ spring:
       enabled: true
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/devicesdb
-    username: devices
-    password: devices
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/devicesdb}
+    username: ${DB_USERNAME:devices}
+    password: ${DB_PASSWORD:devices}
     driver-class-name: org.postgresql.Driver
 
   jpa:

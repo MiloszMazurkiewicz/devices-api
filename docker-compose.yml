@@ -5,6 +5,9 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - DB_URL=${DB_URL:-jdbc:postgresql://postgres:5432/devicesdb}
+      - DB_USERNAME=${DB_USERNAME:-devices}
+      - DB_PASSWORD=${DB_PASSWORD:-devices}
     depends_on:
       postgres:
         condition: service_healthy
@@ -14,13 +17,13 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: devicesdb
-      POSTGRES_USER: devices
-      POSTGRES_PASSWORD: devices
+      POSTGRES_DB: ${POSTGRES_DB:-devicesdb}
+      POSTGRES_USER: ${DB_USERNAME:-devices}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-devices}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U devices -d devicesdb"]
+      test: ["CMD-SHELL", "pg_isready -U $${DB_USERNAME:-devices} -d $${POSTGRES_DB:-devicesdb}"]
       interval: 5s
       timeout: 5s
       retries: 5

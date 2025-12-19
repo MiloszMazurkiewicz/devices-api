@@ -7,6 +7,7 @@ This application provides a RESTful API for managing device resources. It suppor
 
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
+- [Security Configuration](#security-configuration)
 - [Getting Started](#getting-started)
 - [Running the Application](#running-the-application)
 - [API Documentation](#api-documentation)
@@ -35,6 +36,11 @@ This application provides a RESTful API for managing device resources. It suppor
 - Java 21 or higher
 - Maven 3.9 or higher
 - Docker and Docker Compose (for running with containers)
+
+## Security Configuration
+
+Database credentials use environment variables with sensible defaults for development convenience. The application works out-of-the-box without any configuration.
+> **Note:** Default credentials are provided for development/demo purposes only. Never use default credentials in production environments.
 
 ## Getting Started
 
