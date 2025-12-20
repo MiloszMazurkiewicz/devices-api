@@ -196,10 +196,45 @@ The API uses RFC 7807 Problem Details format for error responses:
 
 ## Testing
 
-### Run all tests
+The project includes both unit tests and integration tests with Testcontainers.
+
+### Run unit tests only
+To run only unit tests (excluding integration tests that require Docker):
+```bash
+mvn test -Dtest=DeviceControllerTest,DeviceServiceTest
+```
+This runs 31 tests without requiring Docker.
+
+### Run all tests (including integration tests)
+
+**Prerequisites:**
+- Docker must be running
+- For Colima users on macOS, set these environment variables:
+
+```bash
+export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
+export TESTCONTAINERS_RYUK_DISABLED=true
+mvn test
+```
+
+Or run in a single command:
+```bash
+DOCKER_HOST=unix://$HOME/.colima/default/docker.sock TESTCONTAINERS_RYUK_DISABLED=true mvn test
+```
+
+For Docker Desktop users:
 ```bash
 mvn test
 ```
+
+### Test Coverage
+
+The project uses JaCoCo for test coverage reporting. After running tests, view the coverage report at:
+```
+target/site/jacoco/index.html
+```
+
+Current coverage: **95% instruction coverage**, **86% branch coverage**
 
 ## License
 
