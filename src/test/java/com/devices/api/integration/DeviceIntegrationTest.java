@@ -11,9 +11,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -28,7 +31,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
+@Import(DeviceIntegrationTest.TestConfig.class)
 class DeviceIntegrationTest {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        ObjectMapper objectMapper() {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.findAndRegisterModules();
+            return mapper;
+        }
+    }
 
     @Container
     @ServiceConnection
