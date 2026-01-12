@@ -1,5 +1,6 @@
 package com.devices.api.controller;
 
+import com.devices.api.dto.DeviceFullUpdateRequest;
 import com.devices.api.dto.DeviceRequest;
 import com.devices.api.dto.DeviceResponse;
 import com.devices.api.dto.DeviceUpdateRequest;
@@ -201,11 +202,11 @@ class DeviceControllerTest {
     class UpdateDeviceTests {
 
         @Test
-        @DisplayName("Should update device successfully")
+        @DisplayName("Should fully update device successfully")
         void shouldUpdateDevice() throws Exception {
-            DeviceUpdateRequest request = new DeviceUpdateRequest("Updated", "Brand", DeviceState.IN_USE);
+            DeviceFullUpdateRequest request = new DeviceFullUpdateRequest("Updated", "Brand", DeviceState.IN_USE);
 
-            when(deviceService.update(eq(deviceId), any(DeviceUpdateRequest.class))).thenReturn(deviceResponse);
+            when(deviceService.update(eq(deviceId), any(DeviceFullUpdateRequest.class))).thenReturn(deviceResponse);
 
             mockMvc.perform(put("/api/v1/devices/{id}", deviceId)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -214,12 +215,45 @@ class DeviceControllerTest {
         }
 
         @Test
+        @DisplayName("Should return 400 when name is missing")
+        void shouldReturn400WhenNameIsMissing() throws Exception {
+            String json = "{\"brand\": \"Apple\", \"state\": \"AVAILABLE\"}";
+
+            mockMvc.perform(put("/api/v1/devices/{id}", deviceId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("Should return 400 when brand is missing")
+        void shouldReturn400WhenBrandIsMissing() throws Exception {
+            String json = "{\"name\": \"iPhone\", \"state\": \"AVAILABLE\"}";
+
+            mockMvc.perform(put("/api/v1/devices/{id}", deviceId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("Should return 400 when state is missing")
+        void shouldReturn400WhenStateIsMissing() throws Exception {
+            String json = "{\"name\": \"iPhone\", \"brand\": \"Apple\"}";
+
+            mockMvc.perform(put("/api/v1/devices/{id}", deviceId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
         @DisplayName("Should return 409 when device is in use")
         void shouldReturn409WhenDeviceInUse() throws Exception {
-            DeviceUpdateRequest request = new DeviceUpdateRequest("Updated", null, null);
+            DeviceFullUpdateRequest request = new DeviceFullUpdateRequest("Updated", "Brand", DeviceState.AVAILABLE);
 
-            when(deviceService.update(eq(deviceId), any(DeviceUpdateRequest.class)))
-                    .thenThrow(new DeviceInUseException("Cannot update name or brand"));
+            when(deviceService.update(eq(deviceId), any(DeviceFullUpdateRequest.class)))
+                    .thenThrow(new DeviceInUseException("Cannot fully update device that is in use"));
 
             mockMvc.perform(put("/api/v1/devices/{id}", deviceId)
                             .contentType(MediaType.APPLICATION_JSON)

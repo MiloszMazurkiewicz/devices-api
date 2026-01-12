@@ -1,5 +1,6 @@
 package com.devices.api.service;
 
+import com.devices.api.dto.DeviceFullUpdateRequest;
 import com.devices.api.dto.DeviceRequest;
 import com.devices.api.dto.DeviceResponse;
 import com.devices.api.dto.DeviceUpdateRequest;
@@ -16,7 +17,7 @@ public interface DeviceService {
 
     List<DeviceResponse> getAll(String brand, DeviceState state);
 
-    DeviceResponse update(UUID id, DeviceUpdateRequest request);
+    DeviceResponse update(UUID id, DeviceFullUpdateRequest request);
 
     DeviceResponse partialUpdate(UUID id, DeviceUpdateRequest request);
 

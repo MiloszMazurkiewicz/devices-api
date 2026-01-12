@@ -1,5 +1,6 @@
 package com.devices.api.integration;
 
+import com.devices.api.dto.DeviceFullUpdateRequest;
 import com.devices.api.dto.DeviceRequest;
 import com.devices.api.dto.DeviceResponse;
 import com.devices.api.dto.DeviceUpdateRequest;
@@ -92,14 +93,23 @@ class DeviceIntegrationTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(created.id().toString()));
 
-            // Update
-            DeviceUpdateRequest updateRequest = new DeviceUpdateRequest("iPhone 15 Pro", "Apple", DeviceState.IN_USE);
+            // Update (full replacement via PUT)
+            DeviceFullUpdateRequest updateRequest = new DeviceFullUpdateRequest("iPhone 15 Pro", "Apple", DeviceState.AVAILABLE);
 
             mockMvc.perform(put("/api/v1/devices/{id}", created.id())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.name").value("iPhone 15 Pro"))
+                    .andExpect(jsonPath("$.state").value("AVAILABLE"));
+
+            // Partial update (set to IN_USE via PATCH)
+            DeviceUpdateRequest partialRequest = new DeviceUpdateRequest(null, null, DeviceState.IN_USE);
+
+            mockMvc.perform(patch("/api/v1/devices/{id}", created.id())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(partialRequest)))
+                    .andExpect(status().isOk())
                     .andExpect(jsonPath("$.state").value("IN_USE"));
 
             // Change state to allow deletion
@@ -236,11 +246,25 @@ class DeviceIntegrationTest {
         }
 
         @Test
+        @DisplayName("Should not allow full update when device is in use")
+        void shouldNotAllowFullUpdateWhenInUse() throws Exception {
+            DeviceResponse device = createDeviceWithState(DeviceState.IN_USE);
+
+            DeviceFullUpdateRequest updateRequest = new DeviceFullUpdateRequest("Updated Name", "Updated Brand", DeviceState.AVAILABLE);
+
+            mockMvc.perform(put("/api/v1/devices/{id}", device.id())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(updateRequest)))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.title").value("Device In Use"));
+        }
+
+        @Test
         @DisplayName("Should preserve creation time on update")
         void shouldPreserveCreationTimeOnUpdate() throws Exception {
             DeviceResponse device = createDeviceWithState(DeviceState.AVAILABLE);
 
-            DeviceUpdateRequest updateRequest = new DeviceUpdateRequest("Updated Name", "Updated Brand", DeviceState.INACTIVE);
+            DeviceFullUpdateRequest updateRequest = new DeviceFullUpdateRequest("Updated Name", "Updated Brand", DeviceState.INACTIVE);
 
             MvcResult result = mockMvc.perform(put("/api/v1/devices/{id}", device.id())
                             .contentType(MediaType.APPLICATION_JSON)

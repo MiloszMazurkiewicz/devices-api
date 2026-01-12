@@ -1,5 +1,6 @@
 package com.devices.api.service;
 
+import com.devices.api.dto.DeviceFullUpdateRequest;
 import com.devices.api.dto.DeviceRequest;
 import com.devices.api.dto.DeviceResponse;
 import com.devices.api.dto.DeviceUpdateRequest;
@@ -175,19 +176,63 @@ class DeviceServiceTest {
     }
 
     @Nested
-    @DisplayName("Update Device Tests")
-    class UpdateDeviceTests {
+    @DisplayName("Full Update Device Tests (PUT)")
+    class FullUpdateDeviceTests {
 
         @Test
-        @DisplayName("Should update device successfully when available")
-        void shouldUpdateDeviceWhenAvailable() {
-            DeviceUpdateRequest request = new DeviceUpdateRequest("Updated Name", "Updated Brand", DeviceState.IN_USE);
+        @DisplayName("Should fully update device when available")
+        void shouldFullyUpdateDeviceWhenAvailable() {
+            DeviceFullUpdateRequest request = new DeviceFullUpdateRequest("Updated Name", "Updated Brand", DeviceState.IN_USE);
 
             when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(device));
             when(deviceRepository.save(any(Device.class))).thenReturn(device);
             when(deviceMapper.toResponse(device)).thenReturn(deviceResponse);
 
             DeviceResponse result = deviceService.update(deviceId, request);
+
+            assertThat(result).isNotNull();
+            verify(deviceRepository).save(device);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when fully updating in-use device")
+        void shouldThrowExceptionWhenFullyUpdatingInUseDevice() {
+            device.setState(DeviceState.IN_USE);
+            DeviceFullUpdateRequest request = new DeviceFullUpdateRequest("Name", "Brand", DeviceState.AVAILABLE);
+
+            when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(device));
+
+            assertThatThrownBy(() -> deviceService.update(deviceId, request))
+                    .isInstanceOf(DeviceInUseException.class)
+                    .hasMessageContaining("Cannot fully update");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when device not found")
+        void shouldThrowExceptionWhenDeviceNotFound() {
+            DeviceFullUpdateRequest request = new DeviceFullUpdateRequest("Name", "Brand", DeviceState.AVAILABLE);
+
+            when(deviceRepository.findById(deviceId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> deviceService.update(deviceId, request))
+                    .isInstanceOf(DeviceNotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("Partial Update Device Tests (PATCH)")
+    class PartialUpdateDeviceTests {
+
+        @Test
+        @DisplayName("Should partially update device when available")
+        void shouldPartiallyUpdateDeviceWhenAvailable() {
+            DeviceUpdateRequest request = new DeviceUpdateRequest("Updated Name", null, null);
+
+            when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(device));
+            when(deviceRepository.save(any(Device.class))).thenReturn(device);
+            when(deviceMapper.toResponse(device)).thenReturn(deviceResponse);
+
+            DeviceResponse result = deviceService.partialUpdate(deviceId, request);
 
             assertThat(result).isNotNull();
             verify(deviceRepository).save(device);
@@ -203,7 +248,7 @@ class DeviceServiceTest {
             when(deviceRepository.save(any(Device.class))).thenReturn(device);
             when(deviceMapper.toResponse(device)).thenReturn(deviceResponse);
 
-            DeviceResponse result = deviceService.update(deviceId, request);
+            DeviceResponse result = deviceService.partialUpdate(deviceId, request);
 
             assertThat(result).isNotNull();
             verify(deviceRepository).save(device);
@@ -217,7 +262,7 @@ class DeviceServiceTest {
 
             when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(device));
 
-            assertThatThrownBy(() -> deviceService.update(deviceId, request))
+            assertThatThrownBy(() -> deviceService.partialUpdate(deviceId, request))
                     .isInstanceOf(DeviceInUseException.class)
                     .hasMessageContaining("name or brand");
         }
@@ -230,7 +275,7 @@ class DeviceServiceTest {
 
             when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(device));
 
-            assertThatThrownBy(() -> deviceService.update(deviceId, request))
+            assertThatThrownBy(() -> deviceService.partialUpdate(deviceId, request))
                     .isInstanceOf(DeviceInUseException.class)
                     .hasMessageContaining("name or brand");
         }
@@ -238,11 +283,11 @@ class DeviceServiceTest {
         @Test
         @DisplayName("Should throw exception when device not found")
         void shouldThrowExceptionWhenDeviceNotFound() {
-            DeviceUpdateRequest request = new DeviceUpdateRequest("Name", "Brand", DeviceState.AVAILABLE);
+            DeviceUpdateRequest request = new DeviceUpdateRequest("Name", null, null);
 
             when(deviceRepository.findById(deviceId)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> deviceService.update(deviceId, request))
+            assertThatThrownBy(() -> deviceService.partialUpdate(deviceId, request))
                     .isInstanceOf(DeviceNotFoundException.class);
         }
     }

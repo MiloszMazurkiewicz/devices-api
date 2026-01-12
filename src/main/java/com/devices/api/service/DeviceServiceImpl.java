@@ -1,5 +1,6 @@
 package com.devices.api.service;
 
+import com.devices.api.dto.DeviceFullUpdateRequest;
 import com.devices.api.dto.DeviceRequest;
 import com.devices.api.dto.DeviceResponse;
 import com.devices.api.dto.DeviceUpdateRequest;
@@ -60,10 +61,24 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
-    public DeviceResponse update(UUID id, DeviceUpdateRequest request) {
+    public DeviceResponse update(UUID id, DeviceFullUpdateRequest request) {
         Device device = findDeviceOrThrow(id);
 
-        validateUpdateAllowed(device, request);
+        validateFullUpdateAllowed(device);
+
+        device.setName(request.name());
+        device.setBrand(request.brand());
+        device.setState(request.state());
+
+        Device updatedDevice = deviceRepository.save(device);
+        return deviceMapper.toResponse(updatedDevice);
+    }
+
+    @Override
+    public DeviceResponse partialUpdate(UUID id, DeviceUpdateRequest request) {
+        Device device = findDeviceOrThrow(id);
+
+        validatePartialUpdateAllowed(device, request);
 
         if (request.name() != null) {
             device.setName(request.name());
@@ -77,11 +92,6 @@ public class DeviceServiceImpl implements DeviceService {
 
         Device updatedDevice = deviceRepository.save(device);
         return deviceMapper.toResponse(updatedDevice);
-    }
-
-    @Override
-    public DeviceResponse partialUpdate(UUID id, DeviceUpdateRequest request) {
-        return update(id, request);
     }
 
     @Override
@@ -100,7 +110,14 @@ public class DeviceServiceImpl implements DeviceService {
                 .orElseThrow(() -> new DeviceNotFoundException(id));
     }
 
-    private void validateUpdateAllowed(Device device, DeviceUpdateRequest request) {
+    private void validateFullUpdateAllowed(Device device) {
+        if (device.getState() == DeviceState.IN_USE) {
+            throw new DeviceInUseException(
+                    "Cannot fully update device that is in use. Use PATCH to update state only.");
+        }
+    }
+
+    private void validatePartialUpdateAllowed(Device device, DeviceUpdateRequest request) {
         if (device.getState() == DeviceState.IN_USE) {
             if (request.name() != null || request.brand() != null) {
                 throw new DeviceInUseException(

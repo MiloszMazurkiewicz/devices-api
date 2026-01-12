@@ -1,5 +1,6 @@
 package com.devices.api.controller;
 
+import com.devices.api.dto.DeviceFullUpdateRequest;
 import com.devices.api.dto.DeviceRequest;
 import com.devices.api.dto.DeviceResponse;
 import com.devices.api.dto.DeviceUpdateRequest;
@@ -67,9 +68,11 @@ public class DeviceController {
         return ResponseEntity.ok(devices);
     }
 
-    @Operation(summary = "Update device", description = "Fully updates an existing device. Name and brand cannot be updated if device is in use.")
+    @Operation(summary = "Update device", description = "Fully replaces an existing device. All fields are required. Cannot update device that is in use.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Device updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Device not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "409", description = "Device is in use and cannot be modified",
@@ -78,7 +81,7 @@ public class DeviceController {
     @PutMapping("/{id}")
     public ResponseEntity<DeviceResponse> updateDevice(
             @Parameter(description = "Device ID") @PathVariable UUID id,
-            @RequestBody DeviceUpdateRequest request) {
+            @Valid @RequestBody DeviceFullUpdateRequest request) {
         DeviceResponse response = deviceService.update(id, request);
         return ResponseEntity.ok(response);
     }
